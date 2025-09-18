@@ -1,10 +1,18 @@
 import json
 import asyncio
+import os
+import urllib.parse
+from dotenv import load_dotenv
 from redis import Redis
 from fastapi import APIRouter, UploadFile, File, WebSocket
 from controllers.ocr_controller import find_misspelled_words, richtext_to_plaintext, process_ocr
 
-r = Redis(host="redis", port=6379, decode_responses=True)
+load_dotenv()
+
+redis_url = os.getenv("REDIS_URL")
+url = urllib.parse.urlparse(redis_url)
+
+r = Redis(host=url.hostname, port=url.port, password=url.password, decode_responses=True)
 
 router = APIRouter(prefix="/ocr", tags=["OCR"])
 

@@ -7,6 +7,7 @@ import thaispellcheck
 import numpy as np
 import tempfile
 import os
+import urllib.parse
 # import pandas as pd
 # import ollama
 # import pytesseract
@@ -20,15 +21,18 @@ from dotenv import load_dotenv
 from typhoon_ocr import ocr_document
 from celery import Celery
 from redis import Redis
+
 # from pytesseract import Output
 # from fitz import TextWriter
 
-
-
 load_dotenv()
 
-celery_app = Celery("worker", broker="redis://redis:6379", backend="redis://redis:6379")
-r = Redis(host="redis", port=6379, decode_responses=True)
+
+redis_url = os.getenv("REDIS_URL")
+url = urllib.parse.urlparse(redis_url)
+
+celery_app = Celery("worker", broker=redis_url, backend=redis_url)
+r = Redis(host=url.hostname, port=url.port, password=url.password, decode_responses=True)
 # client = ollama.Client()
 # model = "scb10x/llama3.1-typhoon2-8b-instruct"
 # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
