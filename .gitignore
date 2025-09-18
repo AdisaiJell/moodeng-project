@@ -1,0 +1,14 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+__pycache__
+.venv
+*.jpg
+
+file/
+
+# Ignore everything in static/images
+static/images/*
+
+# But keep default_image.jpg
+!static/images/default_image.jpg
+
+.env

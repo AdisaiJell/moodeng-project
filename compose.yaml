@@ -1,0 +1,60 @@
+name: moodeng-project
+services:
+
+  redis-commander:
+    image: rediscommander/redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports: 
+      - "8081:8081"
+    
+  redis:
+    image: redis
+    ports: 
+      - "6379:6379"
+
+  celery-app:
+    build: .
+    command: celery -A controllers.ocr_controller worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  fastapi-app:
+    build: .
+    command: sh -c "python mock_all_table.py & uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  db: 
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: retrievalsystem
+    ports:
+     - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+    - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  postgres-data:
+  pgadmin-data:
