@@ -132,15 +132,14 @@ def process_image_to_text(page, img, page_width, page_height):
 
 @celery_app.task(bind=True)
 def process_ocr(self,file_bytes, file_name):   
+    task_id = self.request.id
     ocr_result = ''
-    
     content_type = os.path.splitext(file_name)[1].lower()
     
     # ถ้าเป็น PDF
-    if 'pdf' in content_type:
+    if content_type in [".pdf"]:
         with fitz.open(stream=file_bytes, filetype='pdf') as doc:
             
-            task_id = self.request.id
             total_pages = doc.page_count
             progress = "0"
             
@@ -180,7 +179,7 @@ def process_ocr(self,file_bytes, file_name):
         return ocr_format
 
     # ถ้าเป็นภาพ (jpg, png ฯลฯ)
-    elif 'image' in content_type:
+    elif content_type in [".jpg", ".png", ".jpeg"]:
         with Image.open(BytesIO(file_bytes)) as img:
             progress = "0"
 
